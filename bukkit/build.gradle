@@ -5,6 +5,7 @@ dependencies {
 
     implementation 'com.github.ben-manes.caffeine:caffeine:3.3.1'
     implementation 'org.mongodb:mongodb-driver-sync:5.14.0'
+    implementation 'redis.clients:jedis:8.0.2'
     implementation 'io.papermc.paper:paper-api:26.3.build.253-stable'
 }
 
@@ -26,4 +27,7 @@ shadowJar {
     relocate 'com.google.gson', 'com.selixe.economy.library.gson'
     relocate 'com.mongodb', 'com.selixe.economy.library.mongodb'
     relocate 'org.bson', 'com.selixe.economy.library.bson'
+    relocate 'redis.clients.jedis', 'com.selixe.economy.library.jedis'
+    relocate 'org.apache.commons.pool2', 'com.selixe.economy.library.commons.pool2'
+    relocate 'org.json', 'com.selixe.economy.library.json'
 }

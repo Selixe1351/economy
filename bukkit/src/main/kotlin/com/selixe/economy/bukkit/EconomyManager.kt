@@ -7,13 +7,15 @@ import com.mongodb.client.model.ReturnDocument
 import com.mongodb.client.model.Updates
 import com.selixe.economy.bukkit.database.MongoManager
 import com.selixe.economy.bukkit.model.Balance
+import com.selixe.economy.bukkit.redis.RedisManager
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
 class EconomyManager(
-    mongoManager: MongoManager
+    mongoManager: MongoManager,
+    private val redisManager: RedisManager? = null
 ) {
 
     private lateinit var economyService: EconomyService
@@ -43,6 +45,21 @@ class EconomyManager(
             ).first()
 
             document?.getLong("balance") ?: 0L
+        }, executor)
+    }
+
+    fun refreshBalance(userId: UUID): CompletableFuture<Void> {
+        return CompletableFuture.runAsync({
+            val balance = balances.getIfPresent(userId)
+                ?: return@runAsync
+
+            val document = collection.find(
+                Filters.eq("_id", userId.toString())
+            ).first()
+
+            val newBalance = document?.getLong("balance") ?: 0L
+
+            balance.update(newBalance)
         }, executor)
     }
 
@@ -86,7 +103,6 @@ class EconomyManager(
         balances.invalidate(userId)
     }
 
-
     fun add(userId: UUID, amount: Long): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync({
             val document = collection.findOneAndUpdate(
@@ -100,6 +116,12 @@ class EconomyManager(
             val newBalance = document.getLong("balance")
 
             balances.getIfPresent(userId)?.update(newBalance)
+
+            try {
+                redisManager?.publish(userId.toString())
+            } catch (e: Exception) {
+                error("Failed to publish balance update: ${e.message}")
+            }
 
             true
         }, executor)
@@ -125,6 +147,12 @@ class EconomyManager(
 
             balances.getIfPresent(userId)?.update(newBalance)
 
+            try {
+                redisManager?.publish(userId.toString())
+            } catch (e: Exception) {
+                error("Failed to publish balance update: ${e.message}")
+            }
+
             true
         }, executor)
     }
@@ -142,6 +170,12 @@ class EconomyManager(
             val newBalance = document.getLong("balance")
 
             balances.getIfPresent(userId)?.update(newBalance)
+
+            try {
+                redisManager?.publish(userId.toString())
+            } catch (e: Exception) {
+                error("Failed to publish balance update: ${e.message}")
+            }
 
             true
         }, executor)

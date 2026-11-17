@@ -1,3 +1,7 @@
 mongo:
   database: "economy"
   uri: "mongodb://localhost:27017"
+
+redis:
+  channel: "economy:balance-updated"
+  uri: "redis://localhost:6379"
