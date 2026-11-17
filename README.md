@@ -5,7 +5,8 @@ A Minecraft Paper economy plugin written in Kotlin, designed for multi-server en
 
 ## Features
 
-- MongoDB balance persistance
+- MongoDB balance persistence
+- Redis Pub/Sub balance synchronization across servers
 - Asynchronous database operations
 - Caffeine balance caching
 - Economy API for other plugins
@@ -18,6 +19,7 @@ A Minecraft Paper economy plugin written in Kotlin, designed for multi-server en
 - Kotlin
 - Paper API
 - MongoDB
+- Redis
 - Caffeine
 - Gradle
 - JUnit 5 / MockK
