@@ -7,5 +7,13 @@ author: Selixe
 
 commands:
   economy:
-    description: Temporary economy testing command
-    usage: /economy <balance|add|subtract|set> [amount]
+    description: Economy management
+    aliases: [eco]
+
+permissions:
+  economy.balance:
+    default: true
+  economy.balance.others:
+    default: op
+  economy.admin:
+    default: op

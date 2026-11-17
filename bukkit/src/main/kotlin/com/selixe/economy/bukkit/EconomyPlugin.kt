@@ -34,7 +34,13 @@ class EconomyPlugin : JavaPlugin() {
             this
         )
 
-        getCommand("economy")?.setExecutor(EconomyCommand(this, economyService))
+        val handler = EconomyCommand(this, economyService)
+
+        getCommand("economy")?.apply {
+            setExecutor(handler)
+            tabCompleter = handler
+        }
+
     }
 
     override fun onDisable() {
