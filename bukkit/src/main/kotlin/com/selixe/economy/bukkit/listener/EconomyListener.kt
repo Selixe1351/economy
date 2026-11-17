@@ -13,9 +13,19 @@ class EconomyListener(val economyManager: EconomyManager) : Listener {
     @EventHandler
     fun onPreLogin(event: AsyncPlayerPreLoginEvent) {
         try {
-            economyManager.loadBalance(event.uniqueId).get(5, TimeUnit.SECONDS)
+            economyManager.loadBalance(event.uniqueId)
+                .get(5, TimeUnit.SECONDS)
+
+            economyManager.updateUsername(event.uniqueId, event.name)
+                .exceptionally { error ->
+                    error.printStackTrace()
+                    null
+                }
         } catch (_: Exception) {
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Component.text("Failed to load your balance. Please try again."))
+            event.disallow(
+                AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                Component.text("Failed to load your balance. Please try again.")
+            )
         }
     }
 

@@ -69,7 +69,7 @@ class EconomyPlugin : JavaPlugin() {
             this
         )
 
-        val handler = EconomyCommand(this, economyService)
+        val handler = EconomyCommand(this, economyService, economyManager)
 
         getCommand("economy")?.apply {
             setExecutor(handler)

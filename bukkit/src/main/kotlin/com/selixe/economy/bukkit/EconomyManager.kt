@@ -48,6 +48,16 @@ class EconomyManager(
         }, executor)
     }
 
+    fun findUserIdByName(name: String): CompletableFuture<UUID?> {
+        return CompletableFuture.supplyAsync({
+            val document = collection.find(
+                Filters.regex("name", "^${Regex.escape(name)}$", "i")
+            ).first()
+
+            document?.getString("_id")?.let(UUID::fromString)
+        }, executor)
+    }
+
     fun refreshBalance(userId: UUID): CompletableFuture<Void> {
         return CompletableFuture.runAsync({
             val balance = balances.getIfPresent(userId)
@@ -60,6 +70,15 @@ class EconomyManager(
             val newBalance = document?.getLong("balance") ?: 0L
 
             balance.update(newBalance)
+        }, executor)
+    }
+
+    fun updateUsername(userId: UUID, name: String): CompletableFuture<Void> {
+        return CompletableFuture.runAsync({
+            collection.updateOne(
+                Filters.eq("_id", userId.toString()),
+                Updates.set("name", name)
+            )
         }, executor)
     }
 
