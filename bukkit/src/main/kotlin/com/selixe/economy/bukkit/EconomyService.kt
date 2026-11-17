@@ -11,6 +11,10 @@ class EconomyService(private val manager: EconomyManager) : EconomyAPI {
         return manager.getBalance(userId) ?: error("Balance not loaded: $userId")
     }
 
+    override fun getBalanceAsync(userId: UUID): CompletableFuture<Long> {
+        return manager.getBalanceAsync(userId)
+    }
+
     override fun add(
         userId: UUID,
         amount: Long

@@ -6,6 +6,7 @@ import com.selixe.economy.bukkit.EconomyPlugin
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -24,6 +25,14 @@ class EconomyCommand(
         sendMessage(miniMessage.deserialize(prefix + message))
     }
 
+    private fun findPlayer(name: String): OfflinePlayer? {
+        Bukkit.getPlayerExact(name)?.let { return it }
+
+        return Bukkit.getOfflinePlayers().firstOrNull {
+            it.name?.equals(name, ignoreCase = true) == true
+        }
+    }
+
     override fun onCommand(
         sender: CommandSender,
         command: Command,
@@ -35,9 +44,9 @@ class EconomyCommand(
             sender.reply("<white>/$label balance [player] <dark_gray>- <gray>View balance")
 
             if (sender.hasPermission("economy.admin")) {
-                sender.reply("<white>/$label add <player> <amount>")
-                sender.reply("<white>/$label subtract <player> <amount>")
-                sender.reply("<white>/$label set <player> <amount>")
+                sender.reply("<white>/$label add <player> <amount> <gray>Add to balance")
+                sender.reply("<white>/$label subtract <player> <amount> <gray>Subtract from balance")
+                sender.reply("<white>/$label set <player> <amount> <gray>Set balance")
             }
 
             return true
@@ -69,23 +78,30 @@ class EconomyCommand(
                     return true
                 }
 
-                Bukkit.getPlayerExact(args[1])
+                findPlayer(args[1])
             }
 
             if (target == null) {
-                sender.reply("<red>Player not found or offline.")
+                sender.reply("<red>Player not found.")
                 return true
             }
 
-            val balance = economy.getBalance(target.uniqueId).get()
+            economy.getBalanceAsync(target.uniqueId).whenComplete { balance, error ->
+                plugin.server.scheduler.runTask(plugin, Runnable {
+                    if (error != null) {
+                        sender.reply("<red>Failed to load balance.")
+                        return@Runnable
+                    }
 
-            sender.sendMessage(
-                miniMessage.deserialize(
-                    prefix + "<white><player><gray>'s balance: <green><amount>",
-                    Placeholder.unparsed("player", target.name),
-                    Placeholder.unparsed("amount", balance.toString())
-                )
-            )
+                    sender.sendMessage(
+                        miniMessage.deserialize(
+                            "$prefix<white><player><gray>'s balance: <green><amount>",
+                            Placeholder.unparsed("player", target.name ?: "Unknown"),
+                            Placeholder.unparsed("amount", balance.toString())
+                        )
+                    )
+                })
+            }
 
             return true
         }
@@ -105,10 +121,10 @@ class EconomyCommand(
             return true
         }
 
-        val target = Bukkit.getPlayerExact(args[1])
+        val target = findPlayer(args[1])
 
         if (target == null) {
-            sender.reply("<red>Player not found or offline.")
+            sender.reply("<red>Player not found.")
             return true
         }
 
@@ -136,13 +152,10 @@ class EconomyCommand(
                     }
 
                     success -> {
-                        val newBalance = economy.getBalance(target.uniqueId).get()
-
                         sender.sendMessage(
                             miniMessage.deserialize(
-                                prefix + "<green>Updated <white><player><green>'s balance to <white><amount><green>.",
-                                Placeholder.unparsed("player", target.name),
-                                Placeholder.unparsed("amount", newBalance.toString())
+                                "$prefix<green>Successfully updated <white><player><green>'s balance.",
+                                Placeholder.unparsed("player", target.name ?: "Unknown")
                             )
                         )
                     }

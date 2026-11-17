@@ -36,6 +36,16 @@ class EconomyManager(
         return balances.getIfPresent(userId)
     }
 
+    fun getBalanceAsync(userId: UUID): CompletableFuture<Long> {
+        return CompletableFuture.supplyAsync({
+            val document = collection.find(
+                Filters.eq("_id", userId.toString())
+            ).first()
+
+            document?.getLong("balance") ?: 0L
+        }, executor)
+    }
+
     fun loadBalance(userId: UUID): CompletableFuture<Balance> {
         synchronized(loading) {
             balances.getIfPresent(userId)?.let {
