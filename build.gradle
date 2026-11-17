@@ -1,0 +1,53 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.3.0' apply false
+    id 'com.gradleup.shadow' version '9.2.2' apply false
+}
+
+allprojects {
+
+    group = 'com.selixe.economy'
+    version = '1.0.0'
+
+    repositories {
+        mavenCentral()
+
+        maven {
+            url "https://repo.selixe.com/repository/maven-public/"
+            credentials {
+                username = project.findProperty('nexusUsername') ?: System.getenv('NEXUS_USERNAME')
+                password = project.findProperty('nexusPassword') ?: System.getenv('NEXUS_PASSWORD')
+            }
+        }
+
+        maven {
+            name = 'papermc'
+            url = 'https://repo.papermc.io/repository/maven-public/'
+        }
+
+        maven { url 'https://jitpack.io' }
+    }
+
+}
+
+subprojects {
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+
+    kotlin {
+        jvmToolchain(25)
+    }
+
+    dependencies {
+        implementation 'org.apache.commons:commons-lang3:3.12.0'
+        implementation 'com.google.code.gson:gson:2.11.0'
+
+        testImplementation 'org.jetbrains.kotlin:kotlin-test'
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation 'io.mockk:mockk:1.14.9'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+}

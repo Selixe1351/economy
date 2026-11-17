@@ -1,0 +1,11 @@
+name: Economy
+version: '${version}'
+main: com.selixe.economy.bukkit.EconomyPlugin
+api-version: '26.3'
+
+author: Selixe
+
+commands:
+  economy:
+    description: Temporary economy testing command
+    usage: /economy <balance|add|subtract|set> [amount]

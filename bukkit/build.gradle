@@ -1,0 +1,29 @@
+apply plugin: 'com.gradleup.shadow'
+
+dependencies {
+    implementation project(':api')
+
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.3.1'
+    implementation 'org.mongodb:mongodb-driver-sync:5.14.0'
+    implementation 'io.papermc.paper:paper-api:26.3.build.253-stable'
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    archiveFileName = "economy-${version}.jar"
+    archiveClassifier.set('')
+
+    relocate 'kotlin', 'com.selixe.economy.library.kotlin'
+    relocate 'org.apache.commons.lang3', 'com.selixe.economy.library.commons.lang3'
+    relocate 'com.google.gson', 'com.selixe.economy.library.gson'
+    relocate 'com.mongodb', 'com.selixe.economy.library.mongodb'
+    relocate 'org.bson', 'com.selixe.economy.library.bson'
+}
